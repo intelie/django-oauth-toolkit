@@ -69,10 +69,17 @@ class TestOAuth2Authentication(BaseTest):
         self.test_user = UserModel.objects.create_user("test_user", "test@user.com", "123456")
         self.dev_user = UserModel.objects.create_user("dev_user", "dev@user.com", "123456")
 
+#        self.application = Application.objects.create(
+#            name="Test Application",
+#            redirect_uris="http://localhost http://example.com http://example.it",
+#            user=self.dev_user,
+#            client_type=Application.CLIENT_CONFIDENTIAL,
+#            authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
+#        )
+
         self.application = Application.objects.create(
-            name="Test Application",
+            name="Test Application Without User",
             redirect_uris="http://localhost http://example.com http://example.it",
-            user=self.dev_user,
             client_type=Application.CLIENT_CONFIDENTIAL,
             authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
         )

@@ -30,7 +30,6 @@ class BaseTest(TestCaseUtils, TestCase):
 
         self.application = Application(
             name="Test Password Application",
-            user=self.dev_user,
             client_type=Application.CLIENT_PUBLIC,
             authorization_grant_type=Application.GRANT_PASSWORD,
         )

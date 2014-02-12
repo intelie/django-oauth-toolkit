@@ -55,7 +55,7 @@ class AbstractApplication(models.Model):
 
     client_id = models.CharField(max_length=100, unique=True,
                                  default=generate_client_id)
-    user = models.ForeignKey(AUTH_USER_MODEL)
+    user = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True)
     help_text = _("Allowed URIs list, space separated")
     redirect_uris = models.TextField(help_text=help_text,
                                      validators=[validate_uris], blank=True)
