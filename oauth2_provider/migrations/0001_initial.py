@@ -22,7 +22,7 @@ class Migration(SchemaMigration):
         db.create_table(u'oauth2_provider_application', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('client_id', self.gf('django.db.models.fields.CharField')(default='284250a821f74df67cb50b6c2b7fc95d39d0e4a9', unique=True, max_length=100)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm["%s.%s" % (User._meta.app_label, User._meta.object_name)])),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm["%s.%s" % (User._meta.app_label, User._meta.object_name)], null=True, blank=True)),
             ('redirect_uris', self.gf('django.db.models.fields.TextField')(blank=True)),
             ('client_type', self.gf('django.db.models.fields.CharField')(max_length=32)),
             ('authorization_grant_type', self.gf('django.db.models.fields.CharField')(max_length=32)),
