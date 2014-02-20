@@ -65,6 +65,7 @@ class AbstractApplication(models.Model):
     client_secret = models.CharField(max_length=255, blank=True,
                                      default=generate_client_secret)
     name = models.CharField(max_length=255, blank=True)
+    desktop = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -92,7 +93,8 @@ class AbstractApplication(models.Model):
 
     def clean(self):
         from django.core.exceptions import ValidationError
-        if not self.redirect_uris \
+
+        if not self.desktop and not self.redirect_uris \
             and self.authorization_grant_type \
             in (AbstractApplication.GRANT_AUTHORIZATION_CODE,
                 AbstractApplication.GRANT_IMPLICIT):

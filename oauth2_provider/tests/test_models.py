@@ -46,6 +46,24 @@ class TestModels(TestCase):
         self.assertTrue(access_token.allow_scopes([]))
         self.assertFalse(access_token.allow_scopes(['write', 'destroy']))
 
+    def test_desktop_application_empty_redirect_uris(self):
+        # TODO explicacao: se desktop=True, entao full_clean deve rodar de boa
+        app = Application(
+            name="test_app",
+            redirect_uris="",
+            user=self.user,
+            desktop=True,
+            client_type=Application.CLIENT_CONFIDENTIAL,
+            authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
+        )
+
+        # TODO improve error handling
+        try:
+            app.full_clean()
+        except ValidationError:
+            self.fail("The application shouldn't have raised an exception "
+                      "because of empty redirect_uris!")
+
     def test_grant_authorization_code_redirect_uris(self):
         app = Application(
             name="test_app",
