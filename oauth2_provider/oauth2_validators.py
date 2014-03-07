@@ -9,7 +9,7 @@ from django.contrib.auth import authenticate
 from oauthlib.oauth2 import RequestValidator
 
 from .compat import unquote_plus
-from .models import Grant, AccessToken, RefreshToken, get_application_model
+from .models import Grant, AccessToken, RefreshToken, IDToken, get_application_model
 from .settings import oauth2_settings
 
 Application = get_application_model()
@@ -288,6 +288,15 @@ class OAuth2Validator(RequestValidator):
                 access_token=access_token
             )
             refresh_token.save()
+
+        if "id_token" in token:
+            id_token = IDToken(
+                user=request.user,
+                token=token['id_token'],
+                application=request.client,
+                access_token=access_token
+            )
+            id_token.save()
 
         # TODO check out a more reliable way to communicate expire time to oauthlib
         token['expires_in'] = oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS

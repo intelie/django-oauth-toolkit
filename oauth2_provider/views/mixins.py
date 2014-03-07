@@ -97,6 +97,10 @@ class OAuthLibMixin(object):
         core = self.get_oauthlib_core()
         return core.validate_authorization_request(request)
 
+    def create_authentication_response(self, request, scopes, credentials, allow):
+        # LSMAG
+        pass
+
     def create_authorization_response(self, request, scopes, credentials, allow):
         """
         A wrapper method that calls create_authorization_response on `server_class`

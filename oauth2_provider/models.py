@@ -226,6 +226,17 @@ class RefreshToken(models.Model):
         return self.token
 
 
+@python_2_unicode_compatible
+class IDToken(models.Model):
+    user = models.ForeignKey(AUTH_USER_MODEL)
+    token = models.CharField(max_length=255)
+    application = models.ForeignKey(oauth2_settings.APPLICATION_MODEL)
+    access_token = models.OneToOneField(AccessToken, related_name='id_token')
+
+    def __str__(self):
+        return self.token
+
+
 def get_application_model():
     """ Return the Application model that is active in this project. """
     try:

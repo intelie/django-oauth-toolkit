@@ -96,8 +96,14 @@ class AuthorizationView(BaseAuthorizationView, FormView):
 
             scopes = form.cleaned_data.get('scope')
             allow = form.cleaned_data.get('allow')
-            uri, headers, body, status = self.create_authorization_response(
-                request=self.request, scopes=scopes, credentials=credentials, allow=allow)
+
+            if 'openid' in scopes.split():
+                # LSMAG
+                uri, headers, body, status = self.create_authentication_response(
+                    request=self.request, scopes=scopes, credentials=credentials, allow=allow)
+            else:
+                uri, headers, body, status = self.create_authorization_response(
+                    request=self.request, scopes=scopes, credentials=credentials, allow=allow)
             self.success_url = uri
             log.debug("Success url for the request: {0}".format(self.success_url))
             return super(AuthorizationView, self).form_valid(form)
@@ -153,6 +159,8 @@ class TokenView(CsrfExemptMixin, OAuthLibMixin, View):
     def post(self, request, *args, **kwargs):
         url, headers, body, status = self.create_token_response(request)
         response = HttpResponse(content=body, status=status)
+
+        # TODO LSMAG patch para colocar id_token aqui!
 
         for k, v in headers.items():
             response[k] = v
