@@ -26,7 +26,7 @@ class TestOAuthLibCore(TestCase):
         oauthlib_core.verify_request(request, scopes=[])
 
 
-class TestOpenIDConnectServer(TestCaseUtils, TestCase):
+class BaseTest(TestCaseUtils, TestCase):
     def setUp(self):
         self.factory = RequestFactory()
         self.user = UserModel.objects.create_user('test_user', 'test@user.com', '123456')
@@ -64,6 +64,8 @@ class TestOpenIDConnectServer(TestCaseUtils, TestCase):
         query_dict = parse_qs(urlparse(response['Location']).query)
         return query_dict['code'].pop()
 
+
+class TestOpenIDConnectServer(BaseTest):
     def test_basic_auth(self):
         self.client.login(username='test_user', password='123456')
         authorization_code = self.get_auth()
@@ -83,3 +85,36 @@ class TestOpenIDConnectServer(TestCaseUtils, TestCase):
         content = json.loads(response.content.decode('utf-8'))
 
         self.assertIn('id_token', content)
+
+
+class TestUserInfoEndpoint(BaseTest):
+    def get_bearer(self):
+        authorization_code = self.get_auth()
+        auth_headers = self.get_basic_auth_header(self.application.client_id,
+                self.application.client_secret)
+
+        token_request_data = {
+            'grant_type': 'authorization_code',
+            'code': authorization_code,
+            'redirect_uri': 'http://example.it'
+        }
+
+        response = self.client.post(reverse('oauth2_provider:token'),
+                data=token_request_data, **auth_headers)
+
+        content = json.loads(response.content.decode('utf-8'))
+        return {'Authorization': 'Bearer %s' % content['access_token']}
+
+    def test_get_userinfo(self):
+        self.client.login(username='test_user', password='123456')
+        bearer = self.get_bearer()
+
+        response = self.client.get(reverse('oauth2_provider:userinfo'), **bearer)
+        self.assertEqual(response.status_code, 200)
+
+        content = json.loads(response.content.decode('utf-8'))
+        self.assertEqual(content['sub'], self.user.username)
+        self.assertEqual(content['given_name'], self.user.first_name)
+        self.assertEqual(content['family_name'], self.user.last_name)
+        self.assertEqual(content['preferred_username'], self.user.username)
+        self.assertEqual(content['email'], self.user.email)

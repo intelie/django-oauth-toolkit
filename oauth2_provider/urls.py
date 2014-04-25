@@ -7,6 +7,7 @@ urlpatterns = patterns(
     '',
     url(r'^authorize/$', views.AuthorizationView.as_view(), name="authorize"),
     url(r'^token/$', views.TokenView.as_view(), name="token"),
+    url(r'^userinfo/$', views.UserInfoView.as_view(), name='userinfo'),
 )
 
 # Application management views
