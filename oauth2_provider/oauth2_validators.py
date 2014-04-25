@@ -6,7 +6,8 @@ from datetime import timedelta
 
 from django.utils import timezone
 from django.contrib.auth import authenticate
-from oauthlib.oauth2 import RequestValidator
+#from oauthlib.oauth2 import RequestValidator
+from oauthlib.oauth2.rfc6749.id_token_validator import IdTokenValidator
 
 from .compat import unquote_plus
 from .models import Grant, AccessToken, RefreshToken, get_application_model
@@ -25,7 +26,7 @@ GRANT_TYPE_MAPPING = {
 }
 
 
-class OAuth2Validator(RequestValidator):
+class OAuth2Validator(IdTokenValidator):
     def _extract_basic_auth(self, request):
         """
         Return authentication string if request contains basic auth credentials, else return None
@@ -321,3 +322,13 @@ class OAuth2Validator(RequestValidator):
 
         except RefreshToken.DoesNotExist:
             return False
+
+    def initial_id_token_payload(self, request, client):
+        return {
+            'iss': oauth2_settings.ISSUER,
+            'sub': request.user.username,
+            'aud': client.name
+        }
+
+    def id_token_signing_key(self, request, client):
+        return 'HS256', client.client_secret

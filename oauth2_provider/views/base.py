@@ -4,7 +4,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import View, FormView
 from django.utils import timezone
 
-from oauthlib.oauth2 import Server
+#from oauthlib.oauth2 import Server
+from oauthlib.oauth2.rfc6749.endpoints.pre_configured import OpenIDConnectServer as Server
 
 from braces.views import LoginRequiredMixin, CsrfExemptMixin
 
