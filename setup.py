@@ -48,6 +48,8 @@ setup(
         'django-braces>=1.2.2',
         'six>=1.3.0',
         'oauthlib==0.6.1',
+        'pycrypto',
+        'pyjwt',
     ],
     zip_safe=False,
 )
