@@ -336,9 +336,9 @@ class OAuth2Validator(IdTokenValidator):
         return 'HS256', client.client_secret
 
     def _get_issuer_by_request(self, request):
-        url = '%s://%s/' % (request.headers['wsgi.url_scheme'], request.headers['SERVER_NAME'])
+        url = '%s://%s' % (request.headers['wsgi.url_scheme'], request.headers['SERVER_NAME'])
 
         if request.headers['SERVER_PORT'] == '80':
-            return url
+            return url + '/'
 
-        return '%s:%s' % (url, request.headers['SERVER_PORT'])
+        return '%s:%s/' % (url, request.headers['SERVER_PORT'])
