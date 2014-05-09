@@ -324,11 +324,21 @@ class OAuth2Validator(IdTokenValidator):
             return False
 
     def initial_id_token_payload(self, request, client):
+        issuer = oauth2_settings.ISSUER or self._get_issuer_by_request(request)
+
         return {
-            'iss': oauth2_settings.ISSUER,
+            'iss': issuer,
             'sub': request.user.username,
             'aud': client.name
         }
 
     def id_token_signing_key(self, request, client):
         return 'HS256', client.client_secret
+
+    def _get_issuer_by_request(self, request):
+        url = '%s://%s/' % (request.headers['wsgi.url_scheme'], request.headers['SERVER_NAME'])
+
+        if request.headers['SERVER_PORT'] == '80':
+            return url
+
+        return '%s:%s' % (url, request.headers['SERVER_PORT'])

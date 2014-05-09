@@ -40,7 +40,7 @@ DEFAULTS = {
     'ACCESS_TOKEN_EXPIRE_SECONDS': 36000,
     'APPLICATION_MODEL': getattr(settings, 'OAUTH2_PROVIDER_APPLICATION_MODEL', 'oauth2_provider.Application'),
     'REQUEST_APPROVAL_PROMPT': 'force',
-    'ISSUER': 'https://localhost/',
+    'ISSUER': None,
 
     # Special settings that will be evaluated at runtime
     '_SCOPES': [],
