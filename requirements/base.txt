@@ -2,5 +2,5 @@ Sphinx==1.2b1
 South==0.8.2
 #oauthlib==0.6.1
 git+https://github.com/intelie/oauthlib.git@a8af883d17cbe16eec2ba9df6a41602c364921f7#egg=oauthlib
-six==1.3.0
+six==1.10.0
 django-braces==1.2.2
