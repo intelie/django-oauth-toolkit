@@ -2,9 +2,9 @@ from django.test import TestCase, RequestFactory
 import json
 
 from ..backends import get_oauthlib_core
-from ..compat import urlparse, parse_qs, urlencode, get_user_model
+from ..compat import urlparse, parse_qs, get_user_model
 from django.core.urlresolvers import reverse
-from ..models import get_application_model, Grant, AccessToken
+from ..models import get_application_model
 from ..settings import oauth2_settings
 from .test_utils import TestCaseUtils
 
@@ -62,7 +62,7 @@ class BaseTest(TestCaseUtils, TestCase):
 
         response = self.client.post(reverse('oauth2_provider:authorize'), data=authcode_data)
         query_dict = parse_qs(urlparse(response['Location']).query)
-        return query_dict['code'].pop()
+        return query_dict.get('code')
 
 
 class TestOpenIDConnectServer(BaseTest):
@@ -75,11 +75,14 @@ class TestOpenIDConnectServer(BaseTest):
             'code': authorization_code,
             'redirect_uri': 'http://example.it'
         }
-        auth_headers = self.get_basic_auth_header(self.application.client_id,
-                self.application.client_secret)
+        auth_headers = self.get_basic_auth_header(
+            self.application.client_id, self.application.client_secret
+        )
 
-        response = self.client.post(reverse('oauth2_provider:token'),
-                data=token_request_data, **auth_headers)
+        response = self.client.post(
+            reverse('oauth2_provider:token'),
+            data=token_request_data, **auth_headers
+        )
 
         self.assertEqual(response.status_code, 200)
         content = json.loads(response.content.decode('utf-8'))
@@ -90,8 +93,9 @@ class TestOpenIDConnectServer(BaseTest):
 class TestUserInfoEndpoint(BaseTest):
     def get_bearer(self):
         authorization_code = self.get_auth()
-        auth_headers = self.get_basic_auth_header(self.application.client_id,
-                self.application.client_secret)
+        auth_headers = self.get_basic_auth_header(
+            self.application.client_id, self.application.client_secret
+        )
 
         token_request_data = {
             'grant_type': 'authorization_code',
@@ -99,11 +103,12 @@ class TestUserInfoEndpoint(BaseTest):
             'redirect_uri': 'http://example.it'
         }
 
-        response = self.client.post(reverse('oauth2_provider:token'),
-                data=token_request_data, **auth_headers)
+        response = self.client.post(
+            reverse('oauth2_provider:token'), data=token_request_data, **auth_headers
+        )
 
         content = json.loads(response.content.decode('utf-8'))
-        return {'Authorization': 'Bearer %s' % content['access_token']}
+        return {'Authorization': 'Bearer %s' % content.get('access_token')}
 
     def test_get_userinfo(self):
         self.client.login(username='test_user', password='123456')
@@ -118,3 +123,43 @@ class TestUserInfoEndpoint(BaseTest):
         self.assertEqual(content['family_name'], self.user.last_name)
         self.assertEqual(content['preferred_username'], self.user.username)
         self.assertEqual(content['email'], self.user.email)
+        self.assertEqual(content['is_superuser'], False)
+        self.assertEqual(content['is_staff'], False)
+
+    def test_get_userinfo_when_user_is_superuser(self):
+        self.user.is_superuser = True
+        self.user.save()
+
+        self.client.login(username='test_user', password='123456')
+        bearer = self.get_bearer()
+
+        response = self.client.get(reverse('oauth2_provider:userinfo'), **bearer)
+        self.assertEqual(response.status_code, 200)
+
+        content = json.loads(response.content.decode('utf-8'))
+        self.assertEqual(content['sub'], self.user.username)
+        self.assertEqual(content['given_name'], self.user.first_name)
+        self.assertEqual(content['family_name'], self.user.last_name)
+        self.assertEqual(content['preferred_username'], self.user.username)
+        self.assertEqual(content['email'], self.user.email)
+        self.assertEqual(content['is_superuser'], True)
+        self.assertEqual(content['is_staff'], False)
+
+    def test_get_userinfo_when_user_is_staff(self):
+        self.user.is_staff = True
+        self.user.save()
+
+        self.client.login(username='test_user', password='123456')
+        bearer = self.get_bearer()
+
+        response = self.client.get(reverse('oauth2_provider:userinfo'), **bearer)
+        self.assertEqual(response.status_code, 200)
+
+        content = json.loads(response.content.decode('utf-8'))
+        self.assertEqual(content['sub'], self.user.username)
+        self.assertEqual(content['given_name'], self.user.first_name)
+        self.assertEqual(content['family_name'], self.user.last_name)
+        self.assertEqual(content['preferred_username'], self.user.username)
+        self.assertEqual(content['email'], self.user.email)
+        self.assertEqual(content['is_superuser'], False)
+        self.assertEqual(content['is_staff'], True)

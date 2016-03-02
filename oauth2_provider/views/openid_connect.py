@@ -13,7 +13,9 @@ class UserInfoView(ProtectedResourceView):
             'given_name': user.first_name,
             'family_name': user.last_name,
             'preferred_username': user.username,
-            'email': user.email
+            'email': user.email,
+            'is_superuser': getattr(user, 'is_superuser', False),
+            'is_staff': getattr(user, 'is_staff', False),
         }
 
         return HttpResponse(json.dumps(claims))
